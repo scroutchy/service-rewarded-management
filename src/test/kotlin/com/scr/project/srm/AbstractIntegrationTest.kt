@@ -1,0 +1,62 @@
+package com.scr.project.srm
+
+import com.scr.project.srm.entrypoint.messaging.v1.KafkaProcessor
+import org.junit.jupiter.api.TestInstance
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.containers.Network
+import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.kafka.ConfluentKafkaContainer
+import org.testcontainers.utility.DockerImageName
+import reactor.core.Disposable
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
+abstract class AbstractIntegrationTest {
+
+    private val logger: Logger = LoggerFactory.getLogger(AbstractIntegrationTest::class.java)
+    private val subscriptions = mutableListOf<Disposable>()
+
+    @Autowired
+    private lateinit var kafkaProcessors: List<KafkaProcessor<*>>
+
+    companion object {
+
+        private val network = Network.newNetwork()
+        val mongoDBContainer = MongoDBContainer("mongo:6.0").apply {
+            withNetwork(network)
+            start()
+        }
+        val kafkaContainer = ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.8.2"))
+            .withNetwork(network)
+            .withNetworkAliases("kafka")
+            .withEnv("KAFKA_LOG4J_ROOT_LOGLEVEL", "DEBUG")
+            .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+            .apply { start() }
+        val schemaRegistryContainer = GenericContainer(DockerImageName.parse("confluentinc/cp-schema-registry:7.8.2"))
+            .withNetwork(network)
+            .withExposedPorts(8081)
+            .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://kafka:9093")
+            .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
+            .withEnv("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
+            .withEnv("SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL", "DEBUG")
+            .waitingFor(Wait.forHttp("/subjects").forStatusCode(200))
+            .apply { start() }
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun properties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
+            registry.add("spring.kafka.bootstrap-servers") { kafkaContainer.bootstrapServers }
+            registry.add("spring.kafka.properties.schema.registry.url") {
+                "http://${schemaRegistryContainer.host}:${schemaRegistryContainer.getMappedPort(8081)}"
+            }
+        }
+    }
+}

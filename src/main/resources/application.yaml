@@ -1,0 +1,12 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: my_group
+    properties:
+      schema.registry.url: ${SCHEMA_REGISTRY_URL}
+    security-protocol: SASL_PLAINTEXT
+    sasl:
+      mechanism: PLAIN
+      username: user1
+      password: ${KAFKA_SASL_PASSWORD}
