@@ -1,0 +1,2 @@
+mongodb:
+  encryptedUri: #TODO: generate sealed secret

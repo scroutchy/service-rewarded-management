@@ -1,0 +1,26 @@
+nameOverride: rewarded-management
+fullnameOverride: service-rewarded-management
+
+replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/cinema7590904/service-rewarded-management
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+mongodb:
+  # This should be the sealed/encrypted MongoDB URI.
+  encryptedUri: "placeholder"  # overwritten in cluster specific values.yaml
+
+resources:
+  requests:
+    ephemeralStorage: "1Gi"
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"

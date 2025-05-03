@@ -1,0 +1,14 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://mongodb:27017/test
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: my_group
+    properties:
+      schema.registry.url: http://schema-registry:8081
+    security-protocol: PLAINTEXT
+    sasl:
+      mechanism:
+      password: dummyPassword

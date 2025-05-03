@@ -1,0 +1,107 @@
+image: gradle:jdk17-alpine
+
+services:
+  - name: docker:dind
+    alias: docker
+    command: [ "--tls=false" ]
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: unix:///var/run/docker.sock
+  TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  IMAGE_NAME: "service-rewarded-management"
+  REGISTRY: "registry.gitlab.com/cinema7590904"
+
+stages:
+  - build
+  - test
+  - publish
+  - deploy
+
+build:
+  stage: build
+  script:
+    - gradle --build-cache assemble
+    - ls -la build/libs # TODO: to remove
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+  artifacts:
+    paths:
+      - build/libs/service-rewarded-management-${CI_COMMIT_REF_SLUG}.jar
+    expire_in: 1 day
+
+test:
+  stage: test
+  script: gradle check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+  dependencies:
+    - build
+  artifacts:
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/reports/jacoco/test/jacocoTestReport.xml
+    paths:
+      - build/reports/jacoco/test/jacocoTestReport.xml
+  coverage: '/Total.*?([0-9,.]{1,5})%/'
+
+publish:
+  stage: publish
+  before_script:
+    - apk add --no-cache docker
+    - docker version
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $REGISTRY
+    - IMAGE_TAG=${CI_COMMIT_REF_SLUG}
+  script:
+    - gradle publish
+    - ls -la build/libs/
+    - docker build --build-arg APP_VERSION=${CI_COMMIT_REF_SLUG} -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+  dependencies:
+    - build
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
+.deploy_base:
+  services: []
+  stage: deploy
+  when: manual
+  image: alpine:latest
+  before_script:
+    - apk update
+    - apk add curl bash
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | VERIFY_CHECKSUM=false bash
+    - echo "$KUBECONFIG_CLUSTER" > kubeconfig.yaml
+    - export KUBECONFIG=$(pwd)/kubeconfig.yaml
+  script:
+    - helm version
+    - helm upgrade --install springboot-app-rewarded ./ops/helm --set image.tag=${CI_COMMIT_REF_SLUG} -f ./ops/helm/values.yaml -f "$CLUSTER_VALUES_FILE" --debug
+
+deploy_kind:
+  tags:
+    - k8s_docker
+  extends: .deploy_base
+  variables:
+    KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT_K8SinDD"
+    CLUSTER_VALUES_FILE: "./ops/helm/values-kind.yaml"
+
+deploy_minikube:
+  tags:
+    - minikube
+  extends: .deploy_base
+  variables:
+    KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT"
+    CLUSTER_VALUES_FILE: "./ops/helm/values-minikube.yaml"
