@@ -10,17 +10,8 @@ plugins {
 }
 
 group = "org.scr.project"
-fun getGitTag(): String {
-    return try {
-        val tag = ProcessBuilder("git", "describe", "--tags", "--abbrev=0").start().run {
-            inputStream.bufferedReader().readText().trim().takeIf { waitFor() == 0 && it.isNotEmpty() }
-        }
-        tag ?: System.getenv("CI_COMMIT_REF_SLUG") ?: "0.0.1-SNAPSHOT"
-    } catch (e: Exception) {
-        println("Error getting git information: ${e.message}")
-        "0.0.1-SNAPSHOT"
-    }
-}
+fun getGitTag() = System.getenv("CI_COMMIT_TAG") ?: System.getenv("CI_COMMIT_REF_SLUG") ?: "0.0.1-SNAPSHOT"
+
 version = getGitTag()
 private val commonsCinemaVersion = "2.1.4"
 private val mockkVersion = "1.12.0"
