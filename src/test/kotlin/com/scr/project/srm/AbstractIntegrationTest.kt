@@ -1,6 +1,6 @@
 package com.scr.project.srm
 
-import com.scr.project.srm.entrypoint.messaging.v1.KafkaProcessor
+import com.scr.project.commons.cinema.kafka.processor.KafkaProcessor
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -54,7 +54,7 @@ abstract class AbstractIntegrationTest {
         fun properties(registry: DynamicPropertyRegistry) {
             registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
             registry.add("spring.kafka.bootstrap-servers") { kafkaContainer.bootstrapServers }
-            registry.add("spring.kafka.properties.schema.registry.url") {
+            registry.add("spring.kafka.schema.registry.url") {
                 "http://${schemaRegistryContainer.host}:${schemaRegistryContainer.getMappedPort(8081)}"
             }
         }

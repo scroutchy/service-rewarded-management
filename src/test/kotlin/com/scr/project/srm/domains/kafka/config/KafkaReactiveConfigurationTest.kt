@@ -1,5 +1,6 @@
 package com.scr.project.srm.domains.kafka.config
 
+import com.scr.project.commons.cinema.kafka.config.KafkaAvroConsumerConfiguration
 import com.scr.project.srm.config.TopicProperties
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -7,14 +8,11 @@ import org.junit.jupiter.api.Test
 class KafkaReactiveConfigurationTest {
 
     private val topicProperties = TopicProperties()
+    private val consumerConfiguration =
+        KafkaAvroConsumerConfiguration("bootstrapServers", "schemaRegistryUrl", "PLAINTEXT", "", "groupId", null, null)
+
     private val config = KafkaReactiveConfiguration(
-        "bootsrapServers",
-        "groupId",
-        "schemaRegistryUrl",
-        "PLAINTEXT",
-        "",
-        "username",
-        "password",
+        consumerConfiguration.kafkaAvroConsumerProperties(),
         topicProperties
     )
 

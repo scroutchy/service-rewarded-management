@@ -1,11 +1,11 @@
 package com.scr.project.srm.entrypoint.integration.messaging.v1
 
+import com.scr.project.commons.cinema.test.awaitUntil
 import com.scr.project.srm.AbstractIntegrationTest
 import com.scr.project.srm.KafkaTestProducer
 import com.scr.project.srm.RewardedEntityTypeKafkaDto
 import com.scr.project.srm.RewardedKafkaDto
 import com.scr.project.srm.TestKafkaConfig
-import com.scr.project.srm.awaitUntil
 import com.scr.project.srm.config.TopicProperties
 import com.scr.project.srm.domains.rewarded.dao.RewardedDao
 import org.assertj.core.api.Assertions.assertThat

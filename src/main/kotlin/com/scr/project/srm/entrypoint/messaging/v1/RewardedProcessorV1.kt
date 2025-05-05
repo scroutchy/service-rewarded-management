@@ -1,5 +1,6 @@
 package com.scr.project.srm.entrypoint.messaging.v1
 
+import com.scr.project.commons.cinema.kafka.processor.KafkaProcessor
 import com.scr.project.srm.RewardedKafkaDto
 import com.scr.project.srm.domains.rewarded.service.RewardedService
 import com.scr.project.srm.entrypoint.mapper.toEntity
