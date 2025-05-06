@@ -13,7 +13,7 @@ group = "org.scr.project"
 fun getGitTag() = System.getenv("CI_COMMIT_TAG") ?: System.getenv("CI_COMMIT_REF_SLUG") ?: "0.0.1-SNAPSHOT"
 
 version = getGitTag()
-private val commonsCinemaVersion = "2.1.4"
+private val commonsCinemaVersion = "2.2.0"
 private val mockkVersion = "1.12.0"
 
 repositories {
@@ -33,6 +33,7 @@ dependencies {
     implementation("org.apache.avro:avro:1.12.0")
     implementation("io.confluent:kafka-avro-serializer:7.9.0")
     implementation("com.scr.project.commons.cinema:commons-cinema:${commonsCinemaVersion}")
+    implementation("com.scr.project.commons.cinema:commons-cinema-kafka:${commonsCinemaVersion}")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:${commonsCinemaVersion}")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")

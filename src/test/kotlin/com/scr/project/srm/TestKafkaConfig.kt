@@ -10,6 +10,6 @@ class TestKafkaConfig {
     @Bean
     fun testRewardedProducer(
         @Value("\${spring.kafka.bootstrap-servers}") bootstrapServers: String,
-        @Value("\${spring.kafka.properties.schema.registry.url}") schemaRegistryUrl: String
+        @Value("\${spring.kafka.schema.registry.url}") schemaRegistryUrl: String
     ) = KafkaTestProducer<RewardedKafkaDto>(bootstrapServers, schemaRegistryUrl)
 }

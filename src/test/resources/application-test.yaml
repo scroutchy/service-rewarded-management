@@ -6,8 +6,7 @@ spring:
     bootstrap-servers: kafka:9092
     consumer:
       group-id: my_group
-    properties:
-      schema.registry.url: http://schema-registry:8081
+    schema.registry.url: http://schema-registry:8081
     security-protocol: PLAINTEXT
     sasl:
       mechanism:
