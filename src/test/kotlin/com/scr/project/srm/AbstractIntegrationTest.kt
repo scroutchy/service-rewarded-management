@@ -2,6 +2,7 @@ package com.scr.project.srm
 
 import com.scr.project.commons.cinema.kafka.processor.KafkaProcessor
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +17,7 @@ import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
 import reactor.core.Disposable
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(PER_CLASS)
 @ActiveProfiles("test")
 abstract class AbstractIntegrationTest {
 
