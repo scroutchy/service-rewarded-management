@@ -9,7 +9,7 @@ plugins {
     `maven-publish`
 }
 
-group = "org.scr.project"
+group = "com.scr.project"
 fun getGitTag() = System.getenv("CI_COMMIT_TAG") ?: System.getenv("CI_COMMIT_REF_SLUG") ?: "0.0.1-SNAPSHOT"
 
 version = getGitTag()
