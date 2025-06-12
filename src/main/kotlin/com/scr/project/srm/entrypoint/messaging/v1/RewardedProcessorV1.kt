@@ -8,6 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
+import reactor.core.scheduler.Schedulers
 import reactor.kafka.receiver.KafkaReceiver
 import reactor.kafka.receiver.ReceiverRecord
 
@@ -21,6 +22,8 @@ class RewardedProcessorV1(
 
     override fun startConsuming(): Flux<ReceiverRecord<String, RewardedKafkaDto>> {
         return rewardedReceiver.receive()
+            .groupBy { c -> c.partition() }
+            .flatMap { p -> p.publishOn(Schedulers.parallel()) }
             .flatMap { r ->
                 rewardedService.create(r.value().toEntity())
                     .doOnSubscribe { logger.debug("Receiving message: ${r.value()}") }
