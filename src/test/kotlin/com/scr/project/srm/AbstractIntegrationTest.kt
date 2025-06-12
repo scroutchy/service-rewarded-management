@@ -3,8 +3,6 @@ package com.scr.project.srm
 import com.scr.project.commons.cinema.kafka.processor.KafkaProcessor
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -15,14 +13,10 @@ import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
-import reactor.core.Disposable
 
 @TestInstance(PER_CLASS)
 @ActiveProfiles("test")
 abstract class AbstractIntegrationTest {
-
-    private val logger: Logger = LoggerFactory.getLogger(AbstractIntegrationTest::class.java)
-    private val subscriptions = mutableListOf<Disposable>()
 
     @Autowired
     private lateinit var kafkaProcessors: List<KafkaProcessor<*>>
